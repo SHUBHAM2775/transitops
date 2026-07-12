@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CircleDollarSign, ChevronDown, Mail, Lock, User, AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { Zap, ChevronDown, Mail, Lock, User, AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface RoleConfig {
@@ -244,12 +244,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-center items-center px-4 relative overflow-hidden select-none">
+      {/* Dynamic Background Glowing Effect */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-success/5 rounded-full blur-[100px] pointer-events-none" />
+
       {/* Main Container Card */}
       <div className="w-full max-w-[440px] bg-card border border-border rounded-xl p-8 z-10 relative shadow-2xl">
         {/* Logo and Wordmark */}
         <div className="flex flex-col items-center justify-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center shadow-lg mb-3">
-            <CircleDollarSign className="w-6 h-6 text-accent-foreground" />
+          <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-md mb-3">
+            <Zap className="w-6 h-6 text-accent" />
           </div>
           <h2 className="text-xl font-bold tracking-wider text-foreground">TransitOps</h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -303,8 +307,12 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 cursor-pointer"
+                className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 cursor-pointer relative"
               >
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                </span>
+
                 {selectedRole ? (
                   <span className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRole)}`} />
@@ -313,7 +321,7 @@ export default function LoginPage() {
                 ) : (
                   <span className="text-muted-foreground">Choose a profile role to prefill...</span>
                 )}
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </button>
 
               {isDropdownOpen && (
@@ -430,7 +438,7 @@ export default function LoginPage() {
             </button>
 
             {/* Link to Signup */}
-            <p className="text-center text-xs text-muted-foreground mt-4">
+            <p className="text-center text-xs text-muted-foreground mt-6">
               Don&apos;t have an account?{" "}
               <button
                 type="button"
@@ -494,8 +502,12 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setIsDropdownOpenSignup(!isDropdownOpenSignup)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 cursor-pointer"
+                className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 cursor-pointer relative"
               >
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                </span>
+
                 {selectedRoleSignup ? (
                   <span className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRoleSignup)}`} />
@@ -504,7 +516,7 @@ export default function LoginPage() {
                 ) : (
                   <span className="text-muted-foreground">Choose a role...</span>
                 )}
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpenSignup ? "rotate-180" : ""}`} />
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </button>
 
               {isDropdownOpenSignup && (
@@ -582,7 +594,7 @@ export default function LoginPage() {
             </button>
 
             {/* Link to Login */}
-            <p className="text-center text-xs text-muted-foreground mt-4">
+            <p className="text-center text-xs text-muted-foreground mt-6">
               Already have an account?{" "}
               <button
                 type="button"
@@ -600,18 +612,18 @@ export default function LoginPage() {
         )}
 
         {/* Error Alert Box */}
-        <div className={`transition-all duration-300 ${errorMessage ? "opacity-100 h-10 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
-          <div className="p-2.5 rounded bg-destructive/10 border border-destructive/20 flex items-center gap-2">
+        <div className={`transition-all duration-300 ${errorMessage ? "opacity-100 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
+          <div className="p-3 rounded bg-destructive/10 border border-destructive/20 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-            <span className="text-xs font-medium text-destructive truncate">{errorMessage}</span>
+            <span className="text-xs font-medium text-destructive">{errorMessage}</span>
           </div>
         </div>
 
         {/* Success Alert Box */}
-        <div className={`transition-all duration-300 ${successMessage ? "opacity-100 h-10 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
-          <div className="p-2.5 rounded bg-accent/10 border border-accent/20 flex items-center gap-2">
+        <div className={`transition-all duration-300 ${successMessage ? "opacity-100 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
+          <div className="p-3 rounded bg-accent/10 border border-accent/20 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
-            <span className="text-xs font-medium text-accent truncate">{successMessage}</span>
+            <span className="text-xs font-medium text-accent">{successMessage}</span>
           </div>
         </div>
       </div>
