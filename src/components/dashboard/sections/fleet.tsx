@@ -304,12 +304,12 @@ export function FleetSection() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Top Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-card border border-border p-5 rounded-xl shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
           {/* Type Filter */}
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px] h-10 px-4 bg-background border-border">
-              <SelectValue placeholder="Type: All" />
+            <SelectTrigger className="w-full sm:w-[140px] h-10 bg-background border-border">
+              <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">Type: All</SelectItem>
@@ -321,8 +321,8 @@ export function FleetSection() {
 
           {/* Status Filter */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px] h-10 px-4 bg-background border-border">
-              <SelectValue placeholder="Status: All" />
+            <SelectTrigger className="w-full sm:w-[140px] h-10 bg-background border-border">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">Status: All</SelectItem>
@@ -347,13 +347,13 @@ export function FleetSection() {
           </Select>
 
           {/* Search */}
-          <div className="relative w-full sm:w-[280px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative w-full sm:w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search reg. no..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 bg-background border-border"
+              className="pl-9 h-10 w-full bg-background border-border"
             />
           </div>
         </div>
@@ -361,7 +361,7 @@ export function FleetSection() {
         {/* Add Vehicle Modal */}
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700 text-black font-semibold gap-2 shadow-lg h-10 px-5">
+            <Button className="bg-green-600 hover:bg-green-700 text-black font-semibold gap-2 shadow-lg h-10 px-5 w-full md:w-auto">
               <Plus className="w-4 h-4" />
               Add Vehicle
             </Button>
@@ -371,7 +371,7 @@ export function FleetSection() {
               <DialogTitle className="text-xl font-bold">Add New Vehicle</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="regNo" className="text-right text-muted-foreground">Reg. No.</Label>
                 <Input
                   id="regNo"
@@ -381,7 +381,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, regNo: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="nameMode" className="text-right text-muted-foreground">Name/Mode</Label>
                 <Input
                   id="nameMode"
@@ -391,7 +391,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, nameMode: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="type" className="text-right text-muted-foreground">Type</Label>
                 <div className="col-span-3">
                   <Select 
@@ -411,7 +411,7 @@ export function FleetSection() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="capacity" className="text-right text-muted-foreground">Capacity</Label>
                 <Input
                   id="capacity"
@@ -421,7 +421,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, capacity: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="odometer" className="text-right text-muted-foreground">Odometer</Label>
                 <Input
                   id="odometer"
@@ -432,7 +432,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, odometer: Number(e.target.value) })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="acqCost" className="text-right text-muted-foreground">Acq. Cost</Label>
                 <Input
                   id="acqCost"
@@ -443,7 +443,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, acqCost: Number(e.target.value) })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="region" className="text-right text-muted-foreground">Region</Label>
                 <Input
                   id="region"
@@ -453,7 +453,7 @@ export function FleetSection() {
                   onChange={(e) => setNewVehicle({ ...newVehicle, region: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right text-muted-foreground">Status</Label>
                 <div className="col-span-3">
                   <Select 
@@ -605,28 +605,28 @@ export function FleetSection() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/50">
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Reg. No. (Unique)
                     <Filter className="w-3 h-3 opacity-50" />
                   </button>
                 </th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Name/Mode</th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Region</th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Capacity</th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Name/Mode</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Type</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Region</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Capacity</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Odometer
                   </button>
                 </th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Acq. Cost
                   </button>
                 </th>
-                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="w-12"></th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Status</th>
+                <th className="w-12 whitespace-nowrap"></th>
               </tr>
             </thead>
             <tbody>
@@ -643,35 +643,35 @@ export function FleetSection() {
                     className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer animate-in fade-in slide-in-from-left-2"
                     style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
                   >
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm font-medium text-foreground">{vehicle.regNo}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm text-foreground">{vehicle.nameMode}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="px-2 py-1 rounded-md bg-secondary text-sm font-medium text-foreground">
                         {vehicle.type}
                       </span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm text-muted-foreground">{vehicle.region || "—"}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm text-muted-foreground">{vehicle.capacity}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm font-semibold text-foreground">{vehicle.odometer.toLocaleString()}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className="text-sm font-semibold text-foreground">${vehicle.acqCost.toLocaleString()}</span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <span className={`inline-flex items-center justify-center px-2 py-1 text-sm font-semibold rounded-md border ${getStatusColor(vehicle.status)}`}>
                         {vehicle.status}
                       </span>
                     </td>
-                    <td className="py-2 px-6">
+                    <td className="py-2 px-6 whitespace-nowrap">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">

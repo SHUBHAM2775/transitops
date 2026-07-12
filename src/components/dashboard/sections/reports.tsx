@@ -203,7 +203,7 @@ export function ReportsSection() {
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Expense Breakdown</h3>
             <p className="text-xs text-muted-foreground mt-1">Where operational costs are distributed</p>
           </div>
-          <div className="flex items-center gap-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             <div className={`w-[180px] h-[180px] transition-opacity duration-700 ${chartsLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
