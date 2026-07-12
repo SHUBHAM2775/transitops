@@ -7,7 +7,7 @@ import { Header } from "@/components/dashboard/header";
 import { DashboardSection } from "@/components/dashboard/sections/dashboard";
 import { FleetSection } from "@/components/dashboard/sections/fleet";
 import { DriversSection } from "@/components/dashboard/sections/drivers";
-import { CustomersSection } from "@/components/dashboard/sections/customers";
+import { TripsSection } from "@/components/dashboard/sections/trips";
 import { MaintenanceSection } from "@/components/dashboard/sections/maintenance";
 import { FuelsSection } from "@/components/dashboard/sections/fuels";
 import { ReportsSection } from "@/components/dashboard/sections/reports";
@@ -52,7 +52,7 @@ export default function Dashboard() {
       case "drivers":
         return <DriversSection />;
       case "trips":
-        return <CustomersSection />;
+        return <TripsSection />;
       case "maintenance":
         return <MaintenanceSection />;
       case "fuel_expense":
