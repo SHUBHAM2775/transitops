@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 const RbacSelect = ({ initialValue }: { initialValue: "Full" | "View" | "None" }) => {
   const [value, setValue] = useState(initialValue);
@@ -35,15 +36,29 @@ export function SettingsSection() {
   const [safetyWarnings, setSafetyWarnings] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
 
+  // Profile Form States
+  const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState("User");
   const [userRole, setUserRole] = useState("Fleet Manager");
   const [userEmail, setUserEmail] = useState("manager@transitops.com");
+  
+  // Password States
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  // Status Indicators
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserId(user.id);
         setUserEmail(user.email || "");
+        
+        // Fetch only name and role from the users table now
         const { data: profile } = await supabase
           .from("users")
           .select("name, role")
@@ -59,13 +74,71 @@ export function SettingsSection() {
     fetchUser();
   }, []);
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) return;
+
+    setIsUpdating(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      // 1. Update text metadata fields in your database table
+      const { error: profileError } = await supabase
+        .from("users")
+        .update({
+          name: userName,
+        })
+        .eq("id", userId);
+
+      if (profileError) throw profileError;
+
+      // 2. Handle Password Upgrades securely (if the user typed something)
+      if (newPassword) {
+        if (!oldPassword) {
+          throw new Error("You must provide your old password to set a new one.");
+        }
+        if (newPassword.length < 6) {
+          throw new Error("Your new password must be at least 6 characters long.");
+        }
+
+        // Re-authenticate user to confirm old password matches before allowing changes
+        const { error: reauthError } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password: oldPassword,
+        });
+
+        if (reauthError) {
+          throw new Error("Verification failed: The old password you entered is incorrect.");
+        }
+
+        // Apply new password changes to Supabase Auth core
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (passwordError) throw passwordError;
+        
+        // Wipe inputs on a clean save
+        setOldPassword("");
+        setNewPassword("");
+      }
+
+      setSuccessMessage("Profile configuration saved successfully!");
+    } catch (err: any) {
+      setErrorMessage(err.message || "An unexpected error occurred processing your request.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const userInitials = userName.substring(0, 2).toUpperCase();
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10 h-full">
       
       {/* Top Profile Section */}
-      <div className="bg-[#020204] border border-border p-6 rounded-md shadow-sm">
+      <form onSubmit={handleUpdateProfile} className="bg-[#020204] border border-border p-6 rounded-md shadow-sm">
         <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-8">Profile Settings</h2>
         
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8 border-b border-border pb-8 mb-8">
@@ -86,37 +159,70 @@ export function SettingsSection() {
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Full Name</Label>
-              <Input defaultValue={userName} className="bg-background border-border h-11" />
+              <Input 
+                value={userName} 
+                onChange={(e) => setUserName(e.target.value)}
+                className="bg-background border-border h-11" 
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email Address</Label>
-              <Input defaultValue={userEmail} className="bg-background border-border h-11" />
+              <Input value={userEmail} className="bg-background border-border h-11" readOnly disabled />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Role</Label>
-              <Input defaultValue={userRole.replace('_', ' ')} className="bg-background border-border h-11 capitalize" readOnly />
+              <Input value={userRole.replace('_', ' ')} className="bg-background border-border h-11 capitalize" readOnly disabled />
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Company Name</Label>
-              <Input defaultValue="TransitOps Logistics" className="bg-background border-border h-11" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Phone Number</Label>
-              <Input defaultValue="+91 9876543210" className="bg-background border-border h-11" />
+            <div className="space-y-2 md:col-start-1">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Old Password</Label>
+              <Input 
+                type="password" 
+                placeholder="••••••••" 
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="bg-background border-border h-11" 
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">New Password</Label>
-              <Input type="password" placeholder="••••••••" className="bg-background border-border h-11" />
+              <Input 
+                type="password" 
+                placeholder="••••••••" 
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="bg-background border-border h-11" 
+              />
             </div>
           </div>
         </div>
         
-        <div className="mt-8 flex justify-end">
-           <Button className="bg-green-600 hover:bg-green-700 text-black font-semibold px-8 h-10 transition-colors shadow-lg">
-            Update Profile
-          </Button>
+        {/* Alerts and Status Responses */}
+        <div className="space-y-4">
+          {errorMessage && (
+            <div className="p-3 rounded bg-destructive/10 border border-destructive/20 flex items-center gap-2 text-destructive text-xs font-medium max-w-md ml-auto">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+          {successMessage && (
+            <div className="p-3 rounded bg-green-500/10 border border-green-500/20 flex items-center gap-2 text-green-500 text-xs font-medium max-w-md ml-auto">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button 
+              type="submit" 
+              disabled={isUpdating}
+              className="bg-green-600 hover:bg-green-700 text-black font-semibold px-8 h-10 transition-colors shadow-lg flex items-center gap-2"
+            >
+              {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isUpdating ? "Saving..." : "Update Profile"}
+            </Button>
+          </div>
         </div>
-      </div>
+      </form>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         
@@ -147,12 +253,11 @@ export function SettingsSection() {
             </Button>
           </div>
 
-          {/* System Preferences (Added proactively as requested) */}
+          {/* System Preferences */}
           <div className="space-y-6 pt-2 border-t border-border/50">
             <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">System Preferences</h2>
             
             <div className="space-y-3">
-              {/* Toggle 1 */}
               <div className="flex items-center justify-between p-4 bg-[#020204] border border-border rounded-md shadow-sm">
                 <div>
                   <h4 className="text-sm font-medium text-foreground">Maintenance Alerts</h4>
@@ -166,7 +271,6 @@ export function SettingsSection() {
                 </div>
               </div>
 
-              {/* Toggle 2 */}
               <div className="flex items-center justify-between p-4 bg-[#020204] border border-border rounded-md shadow-sm">
                 <div>
                   <h4 className="text-sm font-medium text-foreground">Driver Safety Warnings</h4>
@@ -180,7 +284,6 @@ export function SettingsSection() {
                 </div>
               </div>
 
-              {/* Toggle 3 */}
               <div className="flex items-center justify-between p-4 bg-[#020204] border border-border rounded-md shadow-sm">
                 <div>
                   <h4 className="text-sm font-medium text-foreground">Dark Mode</h4>
