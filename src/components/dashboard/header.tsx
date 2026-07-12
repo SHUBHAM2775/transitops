@@ -5,6 +5,7 @@ import type { Section } from "@/app/dashboard/page";
 import { Bell, Search, Calendar, LogOut, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,18 +34,28 @@ export function Header({ activeSection }: HeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const router = useRouter();
   
+  const [userName, setUserName] = useState("User");
   const [userRole, setUserRole] = useState("Fleet Manager");
   const [userEmail, setUserEmail] = useState("manager@transitops.com");
 
   useEffect(() => {
-    const role = localStorage.getItem("transitops_role");
-    if (role) {
-      setUserRole(role);
-      if (role === "Dispatcher") setUserEmail("dispatcher@transitops.com");
-      else if (role === "Safety Officer") setUserEmail("safety@transitops.com");
-      else if (role === "Financial Analyst") setUserEmail("finance@transitops.com");
-      else setUserEmail("manager@transitops.com");
-    }
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || "");
+        const { data: profile } = await supabase
+          .from("users")
+          .select("name, role")
+          .eq("id", user.id)
+          .single();
+          
+        if (profile) {
+          if (profile.name) setUserName(profile.name);
+          if (profile.role) setUserRole(profile.role);
+        }
+      }
+    };
+    fetchUser();
   }, []);
 
   const handleSignOut = () => {
@@ -53,7 +64,7 @@ export function Header({ activeSection }: HeaderProps) {
     router.push("/");
   };
 
-  const userInitials = userRole.substring(0, 2).toUpperCase();
+  const userInitials = userName.substring(0, 2).toUpperCase();
 
   return (
     <header className="h-16 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between px-6">
@@ -103,8 +114,9 @@ export function Header({ activeSection }: HeaderProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{userRole}</p>
-                <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>
+                <p className="text-sm font-bold text-foreground">{userName}</p>
+                <p className="text-xs font-semibold text-[#4B88C6] capitalize">{userRole.replace('_', ' ')}</p>
+                <p className="text-xs leading-none text-muted-foreground mt-1">{userEmail}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
