@@ -12,6 +12,7 @@ interface RoleConfig {
   dotColor: string;
   borderColor: string;
   bgColor: string;
+  targetRoute: string; // 🌟 Path to their dedicated physical route destination
 }
 
 export default function LoginPage() {
@@ -38,6 +39,7 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // 🌟 Target routes configured according to your Next.js project directory architecture
   const roles: RoleConfig[] = [
     {
       name: "Fleet Manager",
@@ -46,6 +48,7 @@ export default function LoginPage() {
       dotColor: "bg-chart-1",
       borderColor: "border-chart-1/20",
       bgColor: "bg-chart-1/10",
+      targetRoute: "/dashboard?sections=fleet", // 🌟 Dedicated route for Fleet Manager
     },
     {
       name: "Dispatcher",
@@ -54,6 +57,7 @@ export default function LoginPage() {
       dotColor: "bg-chart-2",
       borderColor: "border-chart-2/20",
       bgColor: "bg-chart-2/10",
+      targetRoute: "/dashboard?sections=drivers", // 🌟 Dedicated route for Dispatcher
     },
     {
       name: "Safety Officer",
@@ -62,6 +66,7 @@ export default function LoginPage() {
       dotColor: "bg-chart-3",
       borderColor: "border-chart-3/20",
       bgColor: "bg-chart-3/10",
+      targetRoute: "dashboard", // 🌟 Dedicated route for Safety Officer
     },
     {
       name: "Financial Analyst",
@@ -70,10 +75,10 @@ export default function LoginPage() {
       dotColor: "bg-chart-4",
       borderColor: "border-chart-4/20",
       bgColor: "bg-chart-4/10",
+      targetRoute: "dashboard",
     },
   ];
 
-  // Parse mode query param on load
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -120,7 +125,7 @@ export default function LoginPage() {
 
       const user = data.user;
 
-      // 1. Fetch user profile
+      // 1. Fetch user profile from database
       const { data: profile, error: profileError } = await supabase
         .from("users")
         .select("*")
@@ -133,14 +138,18 @@ export default function LoginPage() {
         throw new Error("User profile or role not found in database.");
       }
 
-      // 🌟 CRITICAL FIX: Set authorization gate flag inside localStorage before navigation
+      // 🌟 Provision security clearance key in LocalStorage
       localStorage.setItem("transitops_logged_in", "true");
 
-      setSuccessMessage("Authentication verified! Loading dashboard...");
+      // Find role data layout parameters
+      const userRoleConfig = roles.find((r) => r.value === profile.role);
+      const targetDestination = userRoleConfig ? userRoleConfig.targetRoute : "/dashboard";
 
-      // 🌟 FORCE ALL ROLES INTO /dashboard AS REQUESTED
+      setSuccessMessage(`Authenticated as ${userRoleConfig?.name || "User"}! Routing...`);
+
+      // 🌟 Redirect directly to the custom dashboard routes
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(targetDestination);
       }, 600);
 
     } catch (err: any) {
@@ -184,19 +193,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Create Auth User
       const { data, error } = await supabase.auth.signUp({
         email: emailSignup,
         password: passwordSignup,
       });
 
       if (error) throw error;
+      if (!data.user) throw new Error("User not created.");
 
-      if (!data.user) {
-        throw new Error("User not created.");
-      }
-
-      // Insert profile into users table
       const { error: insertError } = await supabase
         .from("users")
         .insert({
@@ -237,13 +241,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-center items-center px-4 relative overflow-hidden select-none">
-      {/* Dynamic Background Glowing Effect */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-success/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Main Container Card */}
       <div className="w-full max-w-[440px] bg-card border border-border rounded-xl p-8 z-10 relative shadow-2xl">
-        {/* Logo and Wordmark */}
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-md mb-3">
             <Zap className="w-6 h-6 text-accent" />
@@ -254,7 +255,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Sliding Segment Control Switch */}
         <div className="flex bg-background p-1 rounded-lg mb-6 border border-border">
           <button
             type="button"
@@ -264,9 +264,7 @@ export default function LoginPage() {
               setSuccessMessage("");
             }}
             className={`flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer ${
-              activeTab === "login"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              activeTab === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Sign In
@@ -279,21 +277,15 @@ export default function LoginPage() {
               setSuccessMessage("");
             }}
             className={`flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer ${
-              activeTab === "signup"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              activeTab === "signup" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Sign Up
           </button>
         </div>
 
-        {/* Form rendering */}
         {activeTab === "login" ? (
-          /* ================= LOGIN FORM ================= */
           <form onSubmit={handleSignIn} className="space-y-5">
-
-            {/* Custom Role Selector Dropdown */}
             <div className="relative">
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Select Profile Role
@@ -306,7 +298,6 @@ export default function LoginPage() {
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <User className="w-4 h-4 text-muted-foreground" />
                 </span>
-
                 {selectedRole ? (
                   <span className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRole)}`} />
@@ -338,13 +329,12 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Divider line */}
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px bg-border/60 flex-1" />
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Or enter email</span>
               <div className="h-px bg-border/60 flex-1" />
             </div>
-            {/* Email */}
+
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Email Address
@@ -366,7 +356,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -400,7 +389,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember Me */}
             <div className="flex items-center">
               <input
                 id="remember-me"
@@ -414,7 +402,6 @@ export default function LoginPage() {
               </label>
             </div>
 
-            {/* Submit Sign In */}
             <button
               type="submit"
               disabled={isLoading}
@@ -430,7 +417,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Link to Signup */}
             <p className="text-center text-xs text-muted-foreground mt-6">
               Don&apos;t have an account?{" "}
               <button
@@ -447,9 +433,7 @@ export default function LoginPage() {
             </p>
           </form>
         ) : (
-          /* ================= SIGNUP FORM ================= */
           <form onSubmit={handleSignUp} className="space-y-4">
-            {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Full Name
@@ -468,7 +452,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Email Address */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Email Address
@@ -487,7 +470,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Profile Role Selector */}
             <div className="relative">
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Select Profile Role
@@ -500,7 +482,6 @@ export default function LoginPage() {
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <User className="w-4 h-4 text-muted-foreground" />
                 </span>
-
                 {selectedRoleSignup ? (
                   <span className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRoleSignup)}`} />
@@ -532,7 +513,6 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Password
@@ -551,7 +531,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                 Confirm Password
@@ -570,7 +549,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Submit Sign Up */}
             <button
               type="submit"
               disabled={isLoading}
@@ -586,7 +564,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Link to Login */}
             <p className="text-center text-xs text-muted-foreground mt-6">
               Already have an account?{" "}
               <button
@@ -604,7 +581,6 @@ export default function LoginPage() {
           </form>
         )}
 
-        {/* Error Alert Box */}
         <div className={`transition-all duration-300 ${errorMessage ? "opacity-100 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
           <div className="p-3 rounded bg-destructive/10 border border-destructive/20 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
@@ -612,7 +588,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Success Alert Box */}
         <div className={`transition-all duration-300 ${successMessage ? "opacity-100 mt-5" : "opacity-0 h-0 overflow-hidden"}`}>
           <div className="p-3 rounded bg-accent/10 border border-accent/20 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
@@ -621,7 +596,36 @@ export default function LoginPage() {
         </div>
       </div>
 
-
+      {activeTab === "login" && (
+        <div className="mt-8 z-10 w-full max-w-[440px] text-center animate-in fade-in duration-300">
+          <div className="w-full flex items-center justify-between gap-3 mb-3">
+            <div className="h-px bg-border/60 flex-1" />
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-2">
+              Quick Roles Login
+            </span>
+            <div className="h-px bg-border/60 flex-1" />
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-2.5">
+            {roles.map((role) => {
+              const isActive = selectedRole === role.name;
+              return (
+                <button
+                  key={role.name}
+                  type="button"
+                  onClick={() => handleRoleSelect(role)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${role.bgColor} ${role.borderColor} ${
+                    isActive ? "ring-2 ring-primary/20 border-primary opacity-100 scale-105" : "opacity-75 hover:opacity-100"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${role.dotColor}`} />
+                  <span className="text-foreground">{role.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
