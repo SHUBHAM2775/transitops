@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { DashboardSection } from "@/components/dashboard/sections/dashboard";
-import { PipelineSection } from "@/components/dashboard/sections/pipeline";
-import { DealsSection } from "@/components/dashboard/sections/deals";
+import { FleetSection } from "@/components/dashboard/sections/fleet";
+import { DriversSection } from "@/components/dashboard/sections/drivers";
 import { CustomersSection } from "@/components/dashboard/sections/customers";
-import { TeamSection } from "@/components/dashboard/sections/team";
-import { ForecastingSection } from "@/components/dashboard/sections/forecasting";
+import { MaintenanceSection } from "@/components/dashboard/sections/maintenance";
+import { FuelsSection } from "@/components/dashboard/sections/fuels";
 import { ReportsSection } from "@/components/dashboard/sections/reports";
 import { SettingsSection } from "@/components/dashboard/sections/settings";
 
@@ -47,15 +47,15 @@ export default function Dashboard() {
       case "dashboard":
         return <DashboardSection />;
       case "fleet":
-        return <PipelineSection />;
+        return <FleetSection />;
       case "drivers":
-        return <DealsSection />;
+        return <DriversSection />;
       case "trips":
         return <CustomersSection />;
       case "maintenance":
-        return <TeamSection />;
+        return <MaintenanceSection />;
       case "fuel_expense":
-        return <ForecastingSection />;
+        return <FuelsSection />;
       case "analytics":
         return <ReportsSection />;
       case "settings":
