@@ -9,7 +9,7 @@ import { FleetSection } from "@/components/dashboard/sections/fleet";
 import { DriversSection } from "@/components/dashboard/sections/drivers";
 import { CustomersSection } from "@/components/dashboard/sections/customers";
 import { MaintenanceSection } from "@/components/dashboard/sections/maintenance";
-import { ForecastingSection } from "@/components/dashboard/sections/forecasting";
+import { FuelsSection } from "@/components/dashboard/sections/fuels";
 import { ReportsSection } from "@/components/dashboard/sections/reports";
 import { SettingsSection } from "@/components/dashboard/sections/settings";
 
@@ -55,7 +55,7 @@ export default function Dashboard() {
       case "maintenance":
         return <MaintenanceSection />;
       case "fuel_expense":
-        return <ForecastingSection />;
+        return <FuelsSection />;
       case "analytics":
         return <ReportsSection />;
       case "settings":

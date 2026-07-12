@@ -301,26 +301,26 @@ export function FleetSection() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/50">
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Reg. No. (Unique)
                     <Filter className="w-3 h-3 opacity-50" />
                   </button>
                 </th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name/Mode</th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Capacity</th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Name/Mode</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Capacity</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Odometer
                   </button>
                 </th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   <button className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Acq. Cost
                   </button>
                 </th>
-                <th className="text-left py-3 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                 <th className="w-12"></th>
               </tr>
             </thead>
@@ -338,32 +338,32 @@ export function FleetSection() {
                     className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer animate-in fade-in slide-in-from-left-2"
                     style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <span className="text-sm font-medium text-foreground">{vehicle.regNo}</span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <span className="text-sm text-foreground">{vehicle.nameMode}</span>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className="px-2 py-1 rounded-md bg-secondary text-xs font-medium text-foreground">
+                    <td className="py-2 px-6">
+                      <span className="px-2 py-1 rounded-md bg-secondary text-sm font-medium text-foreground">
                         {vehicle.type}
                       </span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <span className="text-sm text-muted-foreground">{vehicle.capacity}</span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <span className="text-sm font-semibold text-foreground">{vehicle.odometer.toLocaleString()}</span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <span className="text-sm font-semibold text-foreground">${vehicle.acqCost.toLocaleString()}</span>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-md border ${getStatusColor(vehicle.status)}`}>
+                    <td className="py-2 px-6">
+                      <span className={`inline-flex items-center justify-center px-2 py-1 text-sm font-semibold rounded-md border ${getStatusColor(vehicle.status)}`}>
                         {vehicle.status}
                       </span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-2 px-6">
                       <button className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                       </button>

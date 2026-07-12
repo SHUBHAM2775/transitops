@@ -147,7 +147,7 @@ export function MaintenanceSection() {
             <span className="text-green-500 font-semibold w-16 text-sm text-right">Available</span>
           </div>
 
-          <p className="text-[#d97706] text-xs font-medium">
+          <p className="text-[#d97706] text-sm font-medium">
             Note: In Shop vehicles are removed from the dispatch pool.
           </p>
         </div>
@@ -165,10 +165,10 @@ export function MaintenanceSection() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vehicle</th>
-                    <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Service</th>
-                    <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cost</th>
-                    <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Vehicle</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Service</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Cost</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                     <th className="w-12"></th>
                   </tr>
                 </thead>
@@ -186,11 +186,11 @@ export function MaintenanceSection() {
                         className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer animate-in fade-in slide-in-from-left-2"
                         style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
                       >
-                        <td className="py-4 px-6 font-medium text-foreground">{record.vehicle}</td>
-                        <td className="py-4 px-6 text-foreground">{record.service}</td>
-                        <td className="py-4 px-6 font-semibold text-foreground">{record.cost}</td>
-                        <td className="py-4 px-6">
-                          <span className={`inline-flex items-center justify-center px-4 py-1.5 text-xs font-semibold rounded-md border ${
+                        <td className="py-2 px-6 font-medium text-sm text-foreground">{record.vehicle}</td>
+                        <td className="py-2 px-6 text-sm text-foreground">{record.service}</td>
+                        <td className="py-2 px-6 font-semibold text-sm text-foreground">{record.cost}</td>
+                        <td className="py-2 px-6">
+                          <span className={`inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold rounded-md border ${
                             record.status === 'Completed' 
                               ? 'bg-green-600/20 text-green-500 border-green-600/30' 
                               : 'bg-[#d97706]/20 text-[#d97706] border-[#d97706]/30'
@@ -198,7 +198,7 @@ export function MaintenanceSection() {
                             {record.status}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-right">
+                        <td className="py-2 px-6 text-right">
                           <button 
                             onClick={() => handleDelete(record.id)}
                             className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
