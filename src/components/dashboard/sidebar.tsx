@@ -1,22 +1,20 @@
 "use client";
 
 import React from "react";
-import LucideCircleDollarSignIcon from "lucide-react"; // Import the missing icon component
-
 import { cn } from "@/lib/utils";
-import type { Section } from "@/app/page";
+import type { Section } from "@/app/dashboard/page";
 import {
   LayoutDashboard,
-  GitBranch,
-  Handshake,
+  Truck,
   Users,
+  MapPin,
+  Wrench,
+  CircleDollarSign,
   BarChart3,
+  Settings,
   ChevronLeft,
   ChevronRight,
-  CircleDollarSign,
-  Building2,
-  TrendingUp,
-  Settings,
+  Zap
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,13 +25,13 @@ interface SidebarProps {
 }
 
 const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "pipeline", label: "Pipeline", icon: GitBranch },
-  { id: "deals", label: "Deals", icon: Handshake },
-  { id: "customers", label: "Customers", icon: Building2 },
-  { id: "team", label: "Team", icon: Users },
-  { id: "forecasting", label: "Forecasting", icon: TrendingUp },
-  { id: "reports", label: "Reports", icon: BarChart3 },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "fleet", label: "Fleet", icon: Truck },
+  { id: "drivers", label: "Drivers", icon: Users },
+  { id: "trips", label: "Trips", icon: MapPin },
+  { id: "maintenance", label: "Maintenance", icon: Wrench },
+  { id: "fuel_expense", label: "Fuel & Expense", icon: CircleDollarSign },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -54,7 +52,7 @@ export function Sidebar({
       <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-white">
-            <CircleDollarSign className="w-5 h-5 text-accent-foreground" />
+            <Zap className="w-5 h-5 text-accent-foreground" />
           </div>
           <span
             className={cn(
@@ -62,7 +60,7 @@ export function Sidebar({
               collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
             )}
           >
-            SalesOps
+            TransitOps
           </span>
         </div>
       </div>
