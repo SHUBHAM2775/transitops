@@ -628,39 +628,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Role Pill Tags Footer (Only rendered in login tab) */}
-      {activeTab === "login" && (
-        <div className="mt-8 z-10 w-full max-w-[440px] text-center animate-in fade-in duration-300">
-          <div className="w-full flex items-center justify-between gap-3 mb-3">
-            <div className="h-px bg-border/60 flex-1" />
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-2">
-              Quick Roles Login
-            </span>
-            <div className="h-px bg-border/60 flex-1" />
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {roles.map((role) => {
-              const isActive = selectedRole === role.name;
-              return (
-                <button
-                  key={role.name}
-                  type="button"
-                  onClick={() => handleRoleSelect(role)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${role.bgColor} ${role.borderColor} ${
-                    isActive
-                      ? "ring-2 ring-primary/20 border-primary opacity-100 scale-105"
-                      : "opacity-75 hover:opacity-100"
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${role.dotColor}`} />
-                  <span className="text-foreground">{role.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
