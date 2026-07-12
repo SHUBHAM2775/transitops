@@ -34,10 +34,10 @@ interface DBDriver {
   id: string;
   name: string;
   license_number: string;
-  license_category: string;
-  license_expiry: string; // ISO date string e.g. "2028-12-31"
+  category: string;         // was license_category — renamed in schema
+  license_expiry: string;   // ISO date string e.g. "2028-12-31"
   contact_number: string;
-  safety_score: number;
+  safety_score: number | string; // DB stores as numeric or text
   status: "available" | "on_trip" | "off_duty" | "suspended";
 }
 
@@ -103,12 +103,12 @@ const mapDBDriverToUI = (db: DBDriver, completedTrips: number): Driver => ({
   id: db.id,
   name: db.name,
   licenseNo: db.license_number,
-  category: db.license_category,
+  category: db.category,            // updated column name
   expiry: formatExpiry(db.license_expiry),
   isExpired: isLicenseExpired(db.license_expiry),
   contact: db.contact_number,
   tripCompl: completedTrips,
-  safety: db.safety_score ?? 0,
+  safety: Number(db.safety_score) ?? 0,  // cast — DB may store as string
   status: mapStatusToUI(db.status),
 });
 
@@ -153,11 +153,22 @@ export function DriversSection() {
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
   const [editForm, setEditForm] = useState<DriverForm>(emptyForm);
 
+  // Inline contact validation errors
+  const [addContactError, setAddContactError] = useState("");
+  const [editContactError, setEditContactError] = useState("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   // Add Driver form state
   const [newDriver, setNewDriver] = useState<DriverForm>(emptyForm);
+
+  // ── Contact validation helper ───────────────────────────────────────────────
+  /** Strip non-digits; return the cleaned value */
+  const digitsOnly = (val: string) => val.replace(/\D/g, "");
+  /** Returns an error string or empty string if valid */
+  const contactError = (val: string) =>
+    val.length > 0 && val.length !== 10 ? "Phone number must be exactly 10 digits." : "";
 
   // ── Data Fetching ──────────────────────────────────────────────────────────
 
@@ -239,11 +250,19 @@ export function DriversSection() {
   const handleAddDriver = async () => {
     if (!newDriver.name || !newDriver.licenseNo) return;
 
+    // Validate contact before submitting
+    const cErr = contactError(newDriver.contact);
+    if (cErr) { setAddContactError(cErr); return; }
+    if (newDriver.contact.length !== 10) {
+      setAddContactError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     try {
       const { error: insertError } = await supabase.from("drivers").insert({
         name: newDriver.name,
         license_number: newDriver.licenseNo,
-        license_category: newDriver.category,
+        category: newDriver.category,   // updated column name
         license_expiry: newDriver.expiry || null,
         contact_number: newDriver.contact,
         safety_score: 100,
@@ -254,6 +273,7 @@ export function DriversSection() {
 
       setIsAddModalOpen(false);
       setNewDriver(emptyForm);
+      setAddContactError("");
       // Immediately refresh — don't wait for the realtime event
       fetchDrivers();
     } catch (err: any) {
@@ -285,13 +305,21 @@ export function DriversSection() {
   const handleUpdateDriver = async () => {
     if (!editingDriver || !editForm.name || !editForm.licenseNo) return;
 
+    // Validate contact before submitting
+    const cErr = contactError(editForm.contact);
+    if (cErr) { setEditContactError(cErr); return; }
+    if (editForm.contact.length !== 10) {
+      setEditContactError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     try {
       const { error: updateError } = await supabase
         .from("drivers")
         .update({
           name: editForm.name,
           license_number: editForm.licenseNo,
-          license_category: editForm.category,
+          category: editForm.category,   // updated column name
           license_expiry: editForm.expiry || null,
           contact_number: editForm.contact,
           status: editForm.status,
@@ -301,6 +329,7 @@ export function DriversSection() {
       if (updateError) throw updateError;
 
       setEditingDriver(null);
+      setEditContactError("");
       fetchDrivers();
     } catch (err: any) {
       console.error("Error updating driver:", err);
@@ -435,13 +464,24 @@ export function DriversSection() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="contact" className="text-right text-muted-foreground">Contact</Label>
-                <Input
-                  id="contact"
-                  placeholder="e.g. 98765xxxxx"
-                  className="col-span-3 bg-background"
-                  value={newDriver.contact}
-                  onChange={(e) => setNewDriver({ ...newDriver, contact: e.target.value })}
-                />
+                <div className="col-span-3 space-y-1">
+                  <Input
+                    id="contact"
+                    placeholder="10-digit phone number"
+                    inputMode="numeric"
+                    maxLength={10}
+                    className={`bg-background ${addContactError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    value={newDriver.contact}
+                    onChange={(e) => {
+                      const digits = digitsOnly(e.target.value);
+                      setNewDriver({ ...newDriver, contact: digits });
+                      setAddContactError(contactError(digits));
+                    }}
+                  />
+                  {addContactError && (
+                    <p className="text-xs text-red-500">{addContactError}</p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right text-muted-foreground">Status</Label>
@@ -726,12 +766,24 @@ export function DriversSection() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-contact" className="text-right text-muted-foreground">Contact</Label>
-              <Input
-                id="edit-contact"
-                className="col-span-3 bg-background"
-                value={editForm.contact}
-                onChange={(e) => setEditForm({ ...editForm, contact: e.target.value })}
-              />
+              <div className="col-span-3 space-y-1">
+                <Input
+                  id="edit-contact"
+                  placeholder="10-digit phone number"
+                  inputMode="numeric"
+                  maxLength={10}
+                  className={`bg-background ${editContactError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  value={editForm.contact}
+                  onChange={(e) => {
+                    const digits = digitsOnly(e.target.value);
+                    setEditForm({ ...editForm, contact: digits });
+                    setEditContactError(contactError(digits));
+                  }}
+                />
+                {editContactError && (
+                  <p className="text-xs text-red-500">{editContactError}</p>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-status" className="text-right text-muted-foreground">Status</Label>
