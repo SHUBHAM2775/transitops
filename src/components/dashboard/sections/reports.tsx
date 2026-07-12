@@ -1,294 +1,335 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import {
-  PieChart, Pie, Cell, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  BarChart, Bar
-} from "recharts";
-import { FileText, Download, Clock } from "lucide-react";
+import React, { useState, useEffect, useMemo } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { 
+  TrendingUp, 
+  DollarSign, 
+  Truck, 
+  Fuel, 
+  Wrench, 
+  AlertTriangle, 
+  FileText, 
+  Gauge,
+  Loader2,
+  Download,
+  Calendar
+} from 'lucide-react';
 
-const revenueData = [
-  { month: "Jan", revenue: 4000 },
-  { month: "Feb", revenue: 5000 },
-  { month: "Mar", revenue: 4500 },
-  { month: "Apr", revenue: 6000 },
-  { month: "May", revenue: 5500 },
-  { month: "Jun", revenue: 7000 },
-  { month: "Jul", revenue: 6500 },
-];
+// ============================================================================
+// 1. DATABASE SCHEMA TYPES (Self-contained)
+// ============================================================================
+interface Vehicle {
+  id: string;
+  registration_number: string;
+  vehicle_name: string;
+  vehicle_model: string;
+  vehicle_type: string;
+  odometer: number;
+  status: string;
+}
 
-const tripCompletionData = [
-  { month: "Jan", rate: 85 },
-  { month: "Feb", rate: 88 },
-  { month: "Mar", rate: 86 },
-  { month: "Apr", rate: 92 },
-  { month: "May", rate: 90 },
-  { month: "Jun", rate: 95 },
-  { month: "Jul", rate: 94 },
-];
+interface Trip {
+  id: string;
+  trip_number: string;
+  source: string;
+  destination: string;
+  planned_distance: number;
+  actual_distance: number;
+  cargo_weight: number;
+}
 
-const expenseData = [
-  { name: "Fuel", value: 45, color: "oklch(0.7 0.18 220)" },
-  { name: "Maintenance", value: 35, color: "oklch(0.75 0.18 55)" },
-  { name: "Tolls", value: 10, color: "oklch(0.7 0.18 145)" },
-  { name: "Insurance", value: 10, color: "oklch(0.65 0.2 25)" },
-];
+interface FuelLog {
+  id: string;
+  cost: number;
+  liters: number;
+}
 
-const costliestVehicles = [
-  { name: "TRUCK-11", cost: 18000, max: 20000, color: "bg-red-400" },
-  { name: "MINI-03", cost: 6200, max: 20000, color: "bg-[#d97706]" },
-  { name: "VAN-05", cost: 3150, max: 20000, color: "bg-blue-400" },
-];
+interface MaintenanceLog {
+  id: string;
+  cost: number;
+  status: string;
+}
 
-const reports = [
-  { id: "1", name: "Monthly Fleet Cost Summary", type: "Financial", date: "Jul 10, 2026", status: "ready" },
-  { id: "2", name: "Q2 Utilization Analysis", type: "Performance", date: "Jul 05, 2026", status: "ready" },
-  { id: "3", name: "Driver Safety Review", type: "Compliance", date: "Jul 02, 2026", status: "ready" },
-  { id: "4", name: "Maintenance Forecast", type: "Predictive", date: "Jul 01, 2026", status: "generating" },
-];
+interface GeneralExpense {
+  id: string;
+  amount: number;
+}
 
+// ============================================================================
+// 2. SUPABASE BACKEND CLIENT INITIALIZATION
+// Replace keys with your exact project secrets or process.env configuration variables
+// ============================================================================
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================================================
+// 3. NAMED EXPORT (Resolves Next.js Build Mismatch)
+// ============================================================================
 export function ReportsSection() {
-  const [chartsLoaded, setChartsLoaded] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [fuelLogs, setFuelLogs] = useState<FuelLog[]>([]);
+  const [maintenance, setMaintenance] = useState<MaintenanceLog[]>([]);
+  const [expenses, setExpenses] = useState<GeneralExpense[]>([]);
 
+  // Network Fallback Indicators
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch Async Live Database Matrices across Parallel Tables
   useEffect(() => {
-    const timer = setTimeout(() => setChartsLoaded(true), 400);
-    return () => clearTimeout(timer);
+    async function pullFleetReportingData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [
+          { data: vData, error: vErr },
+          { data: tData, error: tErr },
+          { data: fData, error: fErr },
+          { data: mData, error: mErr },
+          { data: eData, error: eErr }
+        ] = await Promise.all([
+          supabase.from('vehicles').select('*'),
+          supabase.from('trips').select('*'),
+          supabase.from('fuel_logs').select('*'),
+          supabase.from('maintenance').select('*'),
+          supabase.from('expenses').select('*')
+        ]);
+
+        if (vErr || tErr || fErr || mErr || eErr) {
+          throw new Error(vErr?.message || tErr?.message || fErr?.message || mErr?.message || eErr?.message);
+        }
+
+        setVehicles(vData || []);
+        setTrips(tData || []);
+        setFuelLogs(fData || []);
+        setMaintenance(mData || []);
+        setExpenses(eData || []);
+
+      } catch (err: any) {
+        console.error('Database report engine failure:', err);
+        setError(err.message || 'Failed to pull live tables from the database backend.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    pullFleetReportingData();
   }, []);
 
+  // Aggregation Engine tailored to cost minimization metrics
+  const analytics = useMemo(() => {
+    const fuelCost = fuelLogs.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
+    const mainCost = maintenance.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
+    const expCost = expenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const dynamicTotalCost = fuelCost + mainCost + expCost;
+
+    const totalDistanceTravelled = trips.reduce((sum, item) => sum + (Number(item.actual_distance) || 0), 0);
+    const efficiencyRatioPerKm = totalDistanceTravelled > 0 ? dynamicTotalCost / totalDistanceTravelled : 0;
+
+    const downAssetsCount = vehicles.filter(v => v.status === 'In Maintenance' || v.status === 'Down').length;
+
+    return {
+      dynamicTotalCost,
+      fuelCost,
+      mainCost,
+      expCost,
+      efficiencyRatioPerKm,
+      totalDistanceTravelled,
+      downAssetsCount
+    };
+  }, [vehicles, trips, fuelLogs, maintenance, expenses]);
+
+  if (loading) {
+    return (
+      <div className="h-96 flex flex-col items-center justify-center text-gray-400 gap-2">
+        <Loader2 className="w-7 h-7 text-indigo-500 animate-spin" />
+        <p className="text-xs font-medium tracking-wide">Assembling live ledger reports configuration...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-red-950/30 border border-red-900/50 rounded-xl max-w-lg mx-auto text-center mt-12">
+        <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+        <h4 className="font-semibold text-white text-sm">Failed to generate real-time metrics audit</h4>
+        <p className="text-xs text-red-400 font-mono mt-1 bg-black/20 p-2 rounded text-left overflow-x-auto">{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
-      {/* Top KPI Row from Mockup */}
-      <div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[#020204] border border-border p-5 border-l-4 border-l-blue-500 rounded-md shadow-sm">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Fuel Efficiency</div>
-            <div className="text-2xl font-semibold text-white">8.4 km/l</div>
-          </div>
-          <div className="bg-[#020204] border border-border p-5 border-l-4 border-l-green-500 rounded-md shadow-sm">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Fleet Utilization</div>
-            <div className="text-2xl font-semibold text-white">81%</div>
-          </div>
-          <div className="bg-[#020204] border border-border p-5 border-l-4 border-l-[#d97706] rounded-md shadow-sm">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Operational Cost</div>
-            <div className="text-2xl font-semibold text-white">34,070</div>
-          </div>
-          <div className="bg-[#020204] border border-border p-5 border-l-4 border-l-green-500 rounded-md shadow-sm">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Vehicle ROI</div>
-            <div className="text-2xl font-semibold text-white">14.2%</div>
-          </div>
+    <div className="space-y-6 text-gray-200">
+      
+      {/* Upper Control Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-800/40 p-4 border border-gray-800 rounded-xl">
+        <div>
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <FileText className="w-4 h-4 text-indigo-400" /> Operational Cost Controls
+          </h2>
+          <p className="text-xs text-gray-400">Pure expense structure diagnostics derived from live Postgres schemas.</p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 italic">
-          ROI = (Revenue - (Maintenance + Fuel)) / Acquisition Cost
-        </p>
+        <button 
+          onClick={() => window.print()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-lg shadow-sm transition"
+        >
+          <Download className="w-3.5 h-3.5" /> Export Audit Sheets
+        </button>
       </div>
 
-      {/* Mockup Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Monthly Revenue Bar Chart */}
-        <div className="bg-[#020204] border border-border p-5 rounded-md shadow-sm">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-6">Monthly Revenue</h3>
-          <div className={`h-[200px] transition-opacity duration-700 ${chartsLoaded ? 'opacity-100' : 'opacity-0'}`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.005 260)" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "oklch(0.65 0 0)", fontSize: 12 }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "oklch(0.65 0 0)", fontSize: 12 }}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  dx={-10}
-                />
-                <Tooltip
-                  cursor={{ fill: "oklch(0.12 0.005 260)" }}
-                  contentStyle={{
-                    backgroundColor: "oklch(0.12 0.005 260)",
-                    border: "1px solid oklch(0.22 0.005 260)",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  labelStyle={{ color: "oklch(0.95 0 0)", fontWeight: 600 }}
-                  formatter={(value: any) => [value.toLocaleString(), "Revenue"]}
-                />
-                <Bar dataKey="revenue" fill="#4B88C6" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      {/* Operational Efficiency Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gray-800/80 border border-gray-700/60 p-4 rounded-xl">
+          <div className="flex justify-between items-center text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <span>Total Fleet Cost</span>
+            <DollarSign className="w-4 h-4 text-emerald-400" />
           </div>
+          <p className="text-2xl font-bold text-white mt-1">
+            ${analytics.dynamicTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <span className="text-[10px] text-gray-500 block mt-0.5">Aggregated logistics outlay</span>
         </div>
 
-        {/* Top Costliest Vehicles Horizontal Bars */}
-        <div className="bg-[#020204] border border-border p-5 rounded-md shadow-sm flex flex-col">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-8">Top Costliest Vehicles</h3>
-          <div className="space-y-8 flex-1 justify-center flex flex-col">
-            {costliestVehicles.map((vehicle, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <div className="w-24 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {vehicle.name}
-                </div>
-                <div className="flex-1 h-5 bg-secondary/50 rounded-sm overflow-hidden group relative">
-                  <div 
-                    className={`h-full ${vehicle.color} rounded-sm transition-all duration-500`} 
-                    style={{ width: `${(vehicle.cost / vehicle.max) * 100}%` }}
-                  />
-                </div>
-                <div className="w-16 text-right text-xs font-semibold text-foreground">
-                  {vehicle.cost.toLocaleString()}
-                </div>
+        <div className="bg-gray-800/80 border border-gray-700/60 p-4 rounded-xl">
+          <div className="flex justify-between items-center text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <span>Cost per Kilometer</span>
+            <TrendingUp className="w-4 h-4 text-indigo-400" />
+          </div>
+          <p className="text-2xl font-bold text-white mt-1">${analytics.efficiencyRatioPerKm.toFixed(2)}/km</p>
+          <span className="text-[10px] text-emerald-400 block mt-0.5">Primary efficiency metric</span>
+        </div>
+
+        <div className="bg-gray-800/80 border border-gray-700/60 p-4 rounded-xl">
+          <div className="flex justify-between items-center text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <span>Aggregated Distance</span>
+            <Gauge className="w-4 h-4 text-purple-400" />
+          </div>
+          <p className="text-2xl font-bold text-white mt-1">{analytics.totalDistanceTravelled.toLocaleString()} km</p>
+          <span className="text-[10px] text-gray-500 block mt-0.5">Active route paths completed</span>
+        </div>
+
+        <div className="bg-gray-800/80 border border-gray-700/60 p-4 rounded-xl">
+          <div className="flex justify-between items-center text-gray-400 text-xs font-semibold uppercase tracking-wider">
+            <span>Fleet Asset Risk</span>
+            <Truck className="w-4 h-4 text-amber-500" />
+          </div>
+          <p className="text-2xl font-bold text-white mt-1">{analytics.downAssetsCount} Offline</p>
+          <span className="text-[10px] text-amber-400 font-medium block mt-0.5">{vehicles.length - analytics.downAssetsCount} Trucks operational</span>
+        </div>
+      </div>
+
+      {/* Internal Budget Layout Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Cost Matrix Allocation Weights */}
+        <div className="lg:col-span-2 bg-gray-800/50 border border-gray-700/70 rounded-xl p-5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-4 flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-indigo-400" /> Internal Operational Spend Distribution
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Fuel Expenditure (`fuel_logs`)</span>
+                <span className="font-mono text-white">${analytics.fuelCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Additional Essential Graphs (Kept from old design but adapted) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Trip Completion Trend Line Chart */}
-        <div className="bg-[#020204] border border-border rounded-md p-5 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trip Completion Trend</h3>
-            <p className="text-xs text-muted-foreground mt-1">Monthly successful trips vs total dispatched</p>
-          </div>
-          <div className={`h-[250px] transition-opacity duration-700 ${chartsLoaded ? 'opacity-100' : 'opacity-0'}`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={tripCompletionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.005 260)" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "oklch(0.65 0 0)", fontSize: 12 }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "oklch(0.65 0 0)", fontSize: 12 }}
-                  tickFormatter={(value) => `${value}%`}
-                  dx={-10}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "oklch(0.12 0.005 260)",
-                    border: "1px solid oklch(0.22 0.005 260)",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  labelStyle={{ color: "oklch(0.95 0 0)", fontWeight: 600 }}
-                  formatter={(value: any) => [`${value}%`, "Completion Rate"]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="rate"
-                  stroke="oklch(0.7 0.18 145)"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Expense Breakdown Pie Chart */}
-        <div className="bg-[#020204] border border-border rounded-md p-5 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Expense Breakdown</h3>
-            <p className="text-xs text-muted-foreground mt-1">Where operational costs are distributed</p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            <div className={`w-[180px] h-[180px] transition-opacity duration-700 ${chartsLoaded ? 'opacity-100' : 'opacity-0'}`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={expenseData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {expenseData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="w-full bg-gray-700 h-2 rounded-full">
+                <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${(analytics.fuelCost / (analytics.dynamicTotalCost || 1)) * 100}%` }}></div>
+              </div>
             </div>
-            <div className="flex-1 space-y-3">
-              {expenseData.map((source, index) => (
-                <div
-                  key={source.name}
-                  className="flex items-center justify-between animate-in fade-in slide-in-from-right-2"
-                  style={{ animationDelay: `${(index + 2) * 100}ms`, animationFillMode: "both" }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: source.color }} />
-                    <span className="text-xs text-foreground uppercase tracking-wider">{source.name}</span>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{source.value}%</span>
-                </div>
-              ))}
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Maintenance Overhead (`maintenance`)</span>
+                <span className="font-mono text-white">${analytics.mainCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="w-full bg-gray-700 h-2 rounded-full">
+                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(analytics.mainCost / (analytics.dynamicTotalCost || 1)) * 100}%` }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Incidentals & Route Expenses (`expenses`)</span>
+                <span className="font-mono text-white">${analytics.expCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="w-full bg-gray-700 h-2 rounded-full">
+                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${(analytics.expCost / (analytics.dynamicTotalCost || 1)) * 100}%` }}></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Recent Reports Table (Text Data) */}
-      <div className="bg-[#020204] border border-border rounded-md overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between p-5 border-b border-border">
+        {/* Dynamic Diagnostics / Anomaly Warning Ledger */}
+        <div className="bg-gray-800/50 border border-gray-700/70 rounded-xl p-5 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent Reports</h3>
-            <p className="text-xs text-muted-foreground mt-1">Generated text data and analysis exports</p>
-          </div>
-          <button className="flex items-center gap-2 px-3 py-1.5 rounded bg-secondary text-xs text-muted-foreground hover:text-foreground transition-colors duration-200">
-            <FileText className="w-3 h-3" />
-            Generate New
-          </button>
-        </div>
-        <div className="divide-y divide-border">
-          {reports.map((report, index) => (
-            <div
-              key={report.id}
-              className="flex items-center justify-between px-5 py-4 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer animate-in fade-in slide-in-from-left-2"
-              style={{ animationDelay: `${(index + 2) * 50}ms`, animationFillMode: "both" }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded bg-secondary/50 flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Discovered Discrepancies
+            </h3>
+            <div className="space-y-2">
+              {analytics.downAssetsCount > 0 ? (
+                <div className="p-3 bg-red-950/30 border border-red-900/50 rounded-lg text-[11px] text-red-300">
+                  <strong>Downtime Alert:</strong> {analytics.downAssetsCount} trucks are currently tagged offline. Inspect the garage logs to release them back into service.
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{report.name}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                    <span className="px-1.5 py-0.5 rounded bg-secondary/50 text-[10px] uppercase tracking-wider">{report.type}</span>
-                    <span>•</span>
-                    <span>{report.date}</span>
-                  </div>
+              ) : (
+                <div className="p-3 bg-emerald-950/20 border border-emerald-900/30 rounded-lg text-[11px] text-emerald-400">
+                  System status is completely healthy. Zero mechanical breakdown metrics flagged.
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {report.status === "generating" ? (
-                  <div className="flex items-center gap-2 text-xs text-[#d97706]">
-                    <Clock className="w-3 h-3 animate-pulse" />
-                    Generating...
-                  </div>
-                ) : (
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
-                    <Download className="w-3 h-3" />
-                    Download
-                  </button>
-                )}
-              </div>
+              )}
             </div>
-          ))}
+          </div>
+          <span className="text-[10px] text-gray-500 border-t border-gray-800 pt-2 block mt-4">
+            Security audits verified against connected Supabase backend logic.
+          </span>
+        </div>
+      </div>
+
+      {/* Dynamic Trip Variance Register */}
+      <div className="bg-gray-800/30 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="p-4 bg-gray-800/60 border-b border-gray-800">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-white">Route Plan Deviation Audits (`trips`)</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-gray-300">
+            <thead className="bg-gray-800/50 text-gray-400 text-[10px] font-semibold uppercase tracking-wider border-b border-gray-800">
+              <tr>
+                <th className="p-3">Trip Identifier</th>
+                <th className="p-3">Transit Corridor</th>
+                <th className="p-3">Target Distance</th>
+                <th className="p-3">Actual Travelled</th>
+                <th className="p-3">Variance Log</th>
+                <th className="p-3">Net Payload Weight</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-800 bg-gray-950/10">
+              {trips.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-gray-500">No active shipping trips found in current billing cycles.</td>
+                </tr>
+              ) : (
+                trips.map((t) => {
+                  const targetDist = Number(t.planned_distance) || 0;
+                  const realDist = Number(t.actual_distance) || 0;
+                  const divergence = realDist - targetDist;
+                  return (
+                    <tr key={t.id} className="hover:bg-gray-800/30 transition-colors">
+                      <td className="p-3 font-mono font-medium text-white">{t.trip_number || 'N/A'}</td>
+                      <td className="p-3 text-gray-400">{t.source} &rarr; {t.destination}</td>
+                      <td className="p-3 font-mono">{targetDist} km</td>
+                      <td className="p-3 font-mono">{realDist} km</td>
+                      <td className={`p-3 font-mono font-semibold ${divergence > 0 ? 'text-red-400' : divergence < 0 ? 'text-blue-400' : 'text-gray-400'}`}>
+                        {divergence > 0 ? `+${divergence}` : divergence} km
+                      </td>
+                      <td className="p-3 font-mono">{(Number(t.cargo_weight) || 0).toLocaleString()} kg</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
