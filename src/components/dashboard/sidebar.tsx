@@ -14,7 +14,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Zap
+  Zap,
+  Sparkles
 } from "lucide-react";
 
 interface SidebarProps {
@@ -31,6 +32,7 @@ const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
   { id: "fleet", label: "Fleet", icon: Truck },
   { id: "drivers", label: "Drivers", icon: Users },
   { id: "trips", label: "Trips", icon: MapPin },
+  { id: "copilot", label: "AI Copilot", icon: Sparkles },
   { id: "maintenance", label: "Maintenance", icon: Wrench },
   { id: "fuel_expense", label: "Fuel & Expense", icon: CircleDollarSign },
   { id: "analytics", label: "Analytics", icon: BarChart3 },

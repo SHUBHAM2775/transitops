@@ -25,6 +25,7 @@ const sectionTitles: Record<Section, string> = {
   fleet: "Fleet",
   drivers: "Drivers",
   trips: "Trips",
+  copilot: "AI Copilot",
   maintenance: "Maintenance",
   fuel_expense: "Fuel & Expense",
   analytics: "Analytics",
