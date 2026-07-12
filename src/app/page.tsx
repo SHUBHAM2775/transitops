@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 interface RoleConfig {
   name: string;
+  value: string;
   email: string;
   dotColor: string;
   borderColor: string;
@@ -40,6 +41,7 @@ export default function LoginPage() {
   const roles: RoleConfig[] = [
     {
       name: "Fleet Manager",
+      value: "fleet_manager",
       email: "manager@transitops.com",
       dotColor: "bg-chart-1",
       borderColor: "border-chart-1/20",
@@ -47,6 +49,7 @@ export default function LoginPage() {
     },
     {
       name: "Dispatcher",
+      value: "dispatcher",
       email: "dispatcher@transitops.com",
       dotColor: "bg-chart-2",
       borderColor: "border-chart-2/20",
@@ -54,6 +57,7 @@ export default function LoginPage() {
     },
     {
       name: "Safety Officer",
+      value: "safety_officer",
       email: "safety@transitops.com",
       dotColor: "bg-chart-3",
       borderColor: "border-chart-3/20",
@@ -61,6 +65,7 @@ export default function LoginPage() {
     },
     {
       name: "Financial Analyst",
+      value: "financial_analyst",
       email: "finance@transitops.com",
       dotColor: "bg-chart-4",
       borderColor: "border-chart-4/20",
@@ -86,82 +91,68 @@ export default function LoginPage() {
     setIsDropdownOpen(false);
   };
 
-  const handleRoleSelectSignup = (roleName: string) => {
-    setSelectedRoleSignup(roleName);
+  const handleRoleSelectSignup = (role: RoleConfig) => {
+    setSelectedRoleSignup(role.value);
     setErrorMessage("");
     setIsDropdownOpenSignup(false);
   };
 
-  const saveUserLocally = () => {
-    try {
-      const registeredUsersJSON = localStorage.getItem("transitops_registered_users");
-      const registeredUsers = registeredUsersJSON ? JSON.parse(registeredUsersJSON) : [];
-      
-      const exists = registeredUsers.some((u: any) => u.email.toLowerCase() === emailSignup.toLowerCase());
-      if (!exists) {
-        registeredUsers.push({
-          name: nameSignup,
-          email: emailSignup.toLowerCase(),
-          password: passwordSignup,
-          role: selectedRoleSignup
-        });
-        localStorage.setItem("transitops_registered_users", JSON.stringify(registeredUsers));
-      }
-    } catch (e) {
-      console.error("Error saving user to localStorage", e);
-    }
-  };
-
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setErrorMessage("");
     setSuccessMessage("");
 
     if (!email || !password) {
-      setErrorMessage("Please fill in both email and password fields.");
+      setErrorMessage("Please fill all fields.");
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate login verification
-    setTimeout(() => {
-      // Find if email matches any role
-      const matchedRole = roles.find((r) => r.email.toLowerCase() === email.toLowerCase());
-      
-      // Check localStorage registered users
-      let matchedRegisteredUser = null;
-      try {
-        const registeredUsersJSON = localStorage.getItem("transitops_registered_users");
-        const registeredUsers = registeredUsersJSON ? JSON.parse(registeredUsersJSON) : [];
-        matchedRegisteredUser = registeredUsers.find(
-          (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        );
-      } catch (err) {
-        console.error("Error checking registered users:", err);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      const user = data.user;
+
+      // 1. Fetch user profile
+      const { data: profile, error: profileError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError; 
+
+      if (!profile || !profile.role) {
+        throw new Error("User profile or role not found in database.");
       }
 
-      if (matchedRole) {
-        localStorage.setItem("transitops_logged_in", "true");
-        localStorage.setItem("transitops_role", matchedRole.name);
+      // 🌟 CRITICAL FIX: Set authorization gate flag inside localStorage before navigation
+      localStorage.setItem("transitops_logged_in", "true");
+
+      setSuccessMessage("Authentication verified! Loading dashboard...");
+
+      // 🌟 FORCE ALL ROLES INTO /dashboard AS REQUESTED
+      setTimeout(() => {
         router.push("/dashboard");
-      } else if (matchedRegisteredUser) {
-        localStorage.setItem("transitops_logged_in", "true");
-        localStorage.setItem("transitops_role", matchedRegisteredUser.role || "Fleet Manager");
-        router.push("/dashboard");
-      } else if (email === "admin@transitops.com" && password === "admin") {
-        localStorage.setItem("transitops_logged_in", "true");
-        localStorage.setItem("transitops_role", "Fleet Manager");
-        router.push("/dashboard");
-      } else {
-        setIsLoading(false);
-        setErrorMessage("Invalid credentials. Try selecting a quick role below.");
-      }
-    }, 800);
+      }, 600);
+
+    } catch (err: any) {
+      setErrorMessage(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setErrorMessage("");
     setSuccessMessage("");
 
@@ -169,77 +160,79 @@ export default function LoginPage() {
       setErrorMessage("Please enter your full name.");
       return;
     }
+
     if (!emailSignup.trim()) {
-      setErrorMessage("Please enter your email address.");
+      setErrorMessage("Please enter your email.");
       return;
     }
+
     if (!selectedRoleSignup) {
-      setErrorMessage("Please select a profile role.");
+      setErrorMessage("Please select a role.");
       return;
     }
-    if (!passwordSignup) {
-      setErrorMessage("Please enter a password.");
+
+    if (passwordSignup.length < 6) {
+      setErrorMessage("Password should be at least 6 characters.");
       return;
     }
+
     if (passwordSignup !== confirmPasswordSignup) {
       setErrorMessage("Passwords do not match.");
-      return;
-    }
-    if (passwordSignup.length < 6) {
-      setErrorMessage("Password must be at least 6 characters.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Attempt Supabase sign up
-      const { error } = await supabase.auth.signUp({
+      // Create Auth User
+      const { data, error } = await supabase.auth.signUp({
         email: emailSignup,
         password: passwordSignup,
-        options: {
-          data: {
-            full_name: nameSignup,
-            role: selectedRoleSignup,
-          },
-        },
       });
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      if (!data.user) {
+        throw new Error("User not created.");
       }
 
-      setSuccessMessage("Registration successful! Check your email for confirmation.");
-      saveUserLocally();
-      
-      // Auto-prefill sign-in values and transition tabs
+      // Insert profile into users table
+      const { error: insertError } = await supabase
+        .from("users")
+        .insert({
+          id: data.user.id,
+          name: nameSignup,
+          email: emailSignup,
+          role: selectedRoleSignup,
+          status: "active",
+        });
+
+      if (insertError) throw insertError;
+
+      setSuccessMessage("Account created successfully!");
+
       setTimeout(() => {
-        setSuccessMessage("");
+        setActiveTab("login");
         setEmail(emailSignup);
         setPassword("");
-        setActiveTab("login");
+        setSuccessMessage("");
         setIsLoading(false);
       }, 1500);
+
     } catch (err: any) {
-      console.warn("Supabase signup failed or not configured, using localStorage fallback:", err.message);
-      
-      // Fallback registration for presentation / demo environment
-      saveUserLocally();
-      
-      setSuccessMessage("Account created successfully! Prefilling login details...");
-      setTimeout(() => {
-        setSuccessMessage("");
-        setEmail(emailSignup);
-        setPassword("");
-        setActiveTab("login");
-        setIsLoading(false);
-      }, 1500);
+      setIsLoading(false);
+      setErrorMessage(err.message);
     }
   };
 
-  const getRoleDotColor = (roleName: string) => {
-    const r = roles.find((role) => role.name === roleName);
+  const getRoleDotColor = (roleValue: string) => {
+    const r = roles.find((role) => role.value === roleValue || role.name === roleValue);
     return r ? r.dotColor : "bg-muted-foreground";
+  };
+
+  const getRoleName = (roleValue: string) => {
+    const r = roles.find((role) => role.value === roleValue);
+    return r ? r.name : roleValue;
   };
 
   return (
@@ -511,7 +504,7 @@ export default function LoginPage() {
                 {selectedRoleSignup ? (
                   <span className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRoleSignup)}`} />
-                    <span className="font-medium">{selectedRoleSignup}</span>
+                    <span className="font-medium">{getRoleName(selectedRoleSignup)}</span>
                   </span>
                 ) : (
                   <span className="text-muted-foreground">Choose a role...</span>
@@ -527,7 +520,7 @@ export default function LoginPage() {
                       <button
                         key={role.name}
                         type="button"
-                        onClick={() => handleRoleSelectSignup(role.name)}
+                        onClick={() => handleRoleSelectSignup(role)}
                         className="w-full text-left px-3.5 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent flex items-center gap-2.5 transition-all duration-150 cursor-pointer"
                       >
                         <span className={`w-2 h-2 rounded-full ${role.dotColor}`} />
