@@ -12,28 +12,42 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  { month: "Jan", dispatched: 150, completed: 140 },
-  { month: "Feb", dispatched: 190, completed: 175 },
-  { month: "Mar", dispatched: 210, completed: 198 },
-  { month: "Apr", dispatched: 240, completed: 220 },
-  { month: "May", dispatched: 200, completed: 190 },
-  { month: "Jun", dispatched: 260, completed: 245 },
-  { month: "Jul", dispatched: 290, completed: 270 },
-  { month: "Aug", dispatched: 310, completed: 295 },
-  { month: "Sep", dispatched: 350, completed: 330 },
-  { month: "Oct", dispatched: 390, completed: 370 },
-  { month: "Nov", dispatched: 420, completed: 400 },
-  { month: "Dec", dispatched: 450, completed: 435 },
-];
+interface RevenueChartProps {
+  trips?: {
+    id: string;
+    status: string;
+    created_at: string;
+  }[];
+}
 
-export function RevenueChart() {
+export function RevenueChart({ trips = [] }: RevenueChartProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const chartData = months.map((month) => ({
+    month,
+    dispatched: 0,
+    completed: 0,
+  }));
+
+  trips.forEach((trip) => {
+    if (!trip.created_at) return;
+    const date = new Date(trip.created_at);
+    const monthIdx = date.getMonth();
+    if (monthIdx >= 0 && monthIdx < 12) {
+      if (trip.status === "dispatched") {
+        chartData[monthIdx].dispatched += 1;
+      } else if (trip.status === "completed") {
+        chartData[monthIdx].completed += 1;
+      }
+    }
+  });
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 h-[380px] animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -56,7 +70,7 @@ export function RevenueChart() {
 
       <div className={`h-[280px] transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="dispatchedGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="oklch(0.7 0.18 220)" stopOpacity={0.4} />

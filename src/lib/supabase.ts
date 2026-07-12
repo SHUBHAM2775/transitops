@@ -18,5 +18,8 @@ export const supabase = isValidUrl(supabaseUrl)
       auth: {
         signUp: async () => ({ data: { user: null }, error: new Error("Supabase URL is not configured.") }),
         signInWithPassword: async () => ({ data: { user: null }, error: new Error("Supabase URL is not configured.") }),
-      }
+      },
+      from: () => ({
+        select: async () => ({ data: [], error: new Error("Supabase URL is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local") })
+      })
     } as any;

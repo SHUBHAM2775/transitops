@@ -163,16 +163,21 @@ body {
 }
 
 /* Custom scrollbar for dark modern dashboard */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-sidebar) var(--bg-sidebar);
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-sidebar);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-sidebar);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
