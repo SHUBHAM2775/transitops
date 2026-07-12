@@ -12,8 +12,9 @@ import { MaintenanceSection } from "@/components/dashboard/sections/maintenance"
 import { FuelsSection } from "@/components/dashboard/sections/fuels";
 import { ReportsSection } from "@/components/dashboard/sections/reports";
 import { SettingsSection } from "@/components/dashboard/sections/settings";
+import { CopilotSection } from "@/components/dashboard/sections/copilot";
 
-export type Section = "dashboard" | "fleet" | "drivers" | "trips" | "maintenance" | "fuel_expense" | "analytics" | "settings";
+export type Section = "dashboard" | "fleet" | "drivers" | "trips" | "copilot" | "maintenance" | "fuel_expense" | "analytics" | "settings";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -53,6 +54,8 @@ export default function Dashboard() {
         return <DriversSection />;
       case "trips":
         return <TripsSection />;
+      case "copilot":
+        return <CopilotSection />;
       case "maintenance":
         return <MaintenanceSection />;
       case "fuel_expense":
