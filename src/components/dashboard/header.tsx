@@ -33,17 +33,17 @@ export function Header({ activeSection }: HeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const router = useRouter();
   
-  const [userRole, setUserRole] = useState("Sales Manager");
-  const [userEmail, setUserEmail] = useState("manager@salesops.com");
+  const [userRole, setUserRole] = useState("Fleet Manager");
+  const [userEmail, setUserEmail] = useState("manager@transitops.com");
 
   useEffect(() => {
     const role = localStorage.getItem("transitops_role");
     if (role) {
       setUserRole(role);
-      if (role === "Account Executive") setUserEmail("ae@salesops.com");
-      else if (role === "SDR") setUserEmail("sdr@salesops.com");
-      else if (role === "Financial Analyst") setUserEmail("finance@salesops.com");
-      else setUserEmail("manager@salesops.com");
+      if (role === "Dispatcher") setUserEmail("dispatcher@transitops.com");
+      else if (role === "Safety Officer") setUserEmail("safety@transitops.com");
+      else if (role === "Financial Analyst") setUserEmail("finance@transitops.com");
+      else setUserEmail("manager@transitops.com");
     }
   }, []);
 

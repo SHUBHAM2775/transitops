@@ -229,9 +229,10 @@ export function SettingsSection() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Administrator</SelectItem>
-                      <SelectItem value="manager">Sales Manager</SelectItem>
-                      <SelectItem value="rep">Sales Representative</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
+                      <SelectItem value="manager">Fleet Manager</SelectItem>
+                      <SelectItem value="dispatcher">Dispatcher</SelectItem>
+                      <SelectItem value="safety">Safety Officer</SelectItem>
+                      <SelectItem value="finance">Financial Analyst</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -39,29 +39,29 @@ export default function LoginPage() {
 
   const roles: RoleConfig[] = [
     {
-      name: "Sales Manager",
-      email: "manager@salesops.com",
+      name: "Fleet Manager",
+      email: "manager@transitops.com",
       dotColor: "bg-chart-1",
       borderColor: "border-chart-1/20",
       bgColor: "bg-chart-1/10",
     },
     {
-      name: "Account Executive",
-      email: "ae@salesops.com",
+      name: "Dispatcher",
+      email: "dispatcher@transitops.com",
       dotColor: "bg-chart-2",
       borderColor: "border-chart-2/20",
       bgColor: "bg-chart-2/10",
     },
     {
-      name: "SDR",
-      email: "sdr@salesops.com",
+      name: "Safety Officer",
+      email: "safety@transitops.com",
       dotColor: "bg-chart-3",
       borderColor: "border-chart-3/20",
       bgColor: "bg-chart-3/10",
     },
     {
       name: "Financial Analyst",
-      email: "finance@salesops.com",
+      email: "finance@transitops.com",
       dotColor: "bg-chart-4",
       borderColor: "border-chart-4/20",
       bgColor: "bg-chart-4/10",
@@ -147,11 +147,11 @@ export default function LoginPage() {
         router.push("/dashboard");
       } else if (matchedRegisteredUser) {
         localStorage.setItem("transitops_logged_in", "true");
-        localStorage.setItem("transitops_role", matchedRegisteredUser.role || "Sales Manager");
+        localStorage.setItem("transitops_role", matchedRegisteredUser.role || "Fleet Manager");
         router.push("/dashboard");
-      } else if (email === "admin@salesops.com" && password === "admin") {
+      } else if (email === "admin@transitops.com" && password === "admin") {
         localStorage.setItem("transitops_logged_in", "true");
-        localStorage.setItem("transitops_role", "Sales Manager");
+        localStorage.setItem("transitops_role", "Fleet Manager");
         router.push("/dashboard");
       } else {
         setIsLoading(false);
@@ -251,7 +251,7 @@ export default function LoginPage() {
           <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center shadow-lg mb-3">
             <CircleDollarSign className="w-6 h-6 text-accent-foreground" />
           </div>
-          <h2 className="text-xl font-bold tracking-wider text-foreground">SalesOps</h2>
+          <h2 className="text-xl font-bold tracking-wider text-foreground">TransitOps</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {activeTab === "login" ? "Sign in to your account" : "Create your new account"}
           </p>
@@ -359,7 +359,7 @@ export default function LoginPage() {
                     setEmail(e.target.value);
                     setSelectedRole(null);
                   }}
-                  placeholder="name@salesops.com"
+                  placeholder="name@transitops.com"
                   className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
                 />
               </div>
@@ -480,7 +480,7 @@ export default function LoginPage() {
                   type="email"
                   value={emailSignup}
                   onChange={(e) => setEmailSignup(e.target.value)}
-                  placeholder="name@salesops.com"
+                  placeholder="name@transitops.com"
                   className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
                 />
               </div>

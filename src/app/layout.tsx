@@ -8,8 +8,8 @@ const _dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const _jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SalesOps Dashboard',
-  description: 'Sales Operations Dashboard - Analytics & Pipeline Management',
+  title: 'TransitOps Dashboard',
+  description: 'Transit Operations Dashboard - Analytics & Fleet Management',
   generator: 'v0.app',
   icons: {
     icon: [
