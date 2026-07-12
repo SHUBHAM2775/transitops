@@ -299,57 +299,7 @@ export default function LoginPage() {
         {activeTab === "login" ? (
           /* ================= LOGIN FORM ================= */
           <form onSubmit={handleSignIn} className="space-y-5">
-            {/* Custom Role Selector Dropdown */}
-            <div className="relative">
-              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Select Profile Role
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full bg-background border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-left flex items-center justify-between text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 cursor-pointer relative"
-              >
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                </span>
 
-                {selectedRole ? (
-                  <span className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${getRoleDotColor(selectedRole)}`} />
-                    <span className="font-medium">{selectedRole}</span>
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">Choose a profile role to prefill...</span>
-                )}
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              </button>
-
-              {isDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-20" onClick={() => setIsDropdownOpen(false)} />
-                  <div className="absolute w-full mt-2 bg-popover border border-border rounded-lg shadow-2xl p-1.5 z-30 animate-in fade-in slide-in-from-top-2 duration-150">
-                    {roles.map((role) => (
-                      <button
-                        key={role.name}
-                        type="button"
-                        onClick={() => handleRoleSelect(role)}
-                        className="w-full text-left px-3.5 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent flex items-center gap-2.5 transition-all duration-150 cursor-pointer"
-                      >
-                        <span className={`w-2 h-2 rounded-full ${role.dotColor}`} />
-                        <span className="font-semibold">{role.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Divider line */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px bg-border/60 flex-1" />
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Or enter email</span>
-              <div className="h-px bg-border/60 flex-1" />
-            </div>
 
             {/* Email */}
             <div>
@@ -628,39 +578,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Role Pill Tags Footer (Only rendered in login tab) */}
-      {activeTab === "login" && (
-        <div className="mt-8 z-10 w-full max-w-[440px] text-center animate-in fade-in duration-300">
-          <div className="w-full flex items-center justify-between gap-3 mb-3">
-            <div className="h-px bg-border/60 flex-1" />
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-2">
-              Quick Roles Login
-            </span>
-            <div className="h-px bg-border/60 flex-1" />
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {roles.map((role) => {
-              const isActive = selectedRole === role.name;
-              return (
-                <button
-                  key={role.name}
-                  type="button"
-                  onClick={() => handleRoleSelect(role)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${role.bgColor} ${role.borderColor} ${
-                    isActive
-                      ? "ring-2 ring-primary/20 border-primary opacity-100 scale-105"
-                      : "opacity-75 hover:opacity-100"
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${role.dotColor}`} />
-                  <span className="text-foreground">{role.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
