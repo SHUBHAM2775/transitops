@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   TrendingUp, 
@@ -78,47 +78,71 @@ export function ReportsSection() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const pullFleetReportingData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [
+        { data: vData, error: vErr },
+        { data: tData, error: tErr },
+        { data: fData, error: fErr },
+        { data: mData, error: mErr },
+        { data: eData, error: eErr }
+      ] = await Promise.all([
+        supabase.from('vehicles').select('*'),
+        supabase.from('trips').select('*'),
+        supabase.from('fuel_logs').select('*'),
+        supabase.from('maintenance').select('*'),
+        supabase.from('expenses').select('*')
+      ]);
+
+      if (vErr || tErr || fErr || mErr || eErr) {
+        throw new Error(vErr?.message || tErr?.message || fErr?.message || mErr?.message || eErr?.message);
+      }
+
+      setVehicles(vData || []);
+      setTrips(tData || []);
+      setFuelLogs(fData || []);
+      setMaintenance(mData || []);
+      setExpenses(eData || []);
+
+    } catch (err: any) {
+      console.error('Database report engine failure:', err);
+      setError(err.message || 'Failed to pull live tables from the database backend.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch Async Live Database Matrices across Parallel Tables
   useEffect(() => {
-    async function pullFleetReportingData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [
-          { data: vData, error: vErr },
-          { data: tData, error: tErr },
-          { data: fData, error: fErr },
-          { data: mData, error: mErr },
-          { data: eData, error: eErr }
-        ] = await Promise.all([
-          supabase.from('vehicles').select('*'),
-          supabase.from('trips').select('*'),
-          supabase.from('fuel_logs').select('*'),
-          supabase.from('maintenance').select('*'),
-          supabase.from('expenses').select('*')
-        ]);
-
-        if (vErr || tErr || fErr || mErr || eErr) {
-          throw new Error(vErr?.message || tErr?.message || fErr?.message || mErr?.message || eErr?.message);
-        }
-
-        setVehicles(vData || []);
-        setTrips(tData || []);
-        setFuelLogs(fData || []);
-        setMaintenance(mData || []);
-        setExpenses(eData || []);
-
-      } catch (err: any) {
-        console.error('Database report engine failure:', err);
-        setError(err.message || 'Failed to pull live tables from the database backend.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     pullFleetReportingData();
-  }, []);
+
+    // Subscribe to realtime database changes on reporting tables
+    const channel = supabase
+      .channel('reports-section-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, () => {
+        pullFleetReportingData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trips' }, () => {
+        pullFleetReportingData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fuel_logs' }, () => {
+        pullFleetReportingData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'maintenance' }, () => {
+        pullFleetReportingData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
+        pullFleetReportingData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [pullFleetReportingData]);
 
   // Aggregation Engine tailored to cost minimization metrics
   const analytics = useMemo(() => {

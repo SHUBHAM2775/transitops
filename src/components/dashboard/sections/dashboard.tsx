@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { RevenueChart } from "@/components/dashboard/charts/revenue-chart";
 import { PipelineOverview } from "@/components/dashboard/charts/pipeline-overview";
@@ -51,47 +51,65 @@ export function DashboardSection() {
   const [status, setStatus] = useState("All");
   const [region, setRegion] = useState("All");
 
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [vehiclesRes, tripsRes, driversRes] = await Promise.all([
-          supabase.from("vehicles").select("id, registration_number, vehicle_name, vehicle_type, region, status"),
-          supabase.from("trips").select("id, source, destination, status, created_at, planned_distance, vehicle_id, driver_id"),
-          supabase.from("drivers").select("id, name, safety_score, status")
-        ]);
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [vehiclesRes, tripsRes, driversRes] = await Promise.all([
+        supabase.from("vehicles").select("id, registration_number, vehicle_name, vehicle_type, region, status"),
+        supabase.from("trips").select("id, source, destination, status, created_at, planned_distance, vehicle_id, driver_id"),
+        supabase.from("drivers").select("id, name, safety_score, status")
+      ]);
 
-        if (vehiclesRes.error) throw vehiclesRes.error;
-        if (tripsRes.error) throw tripsRes.error;
-        if (driversRes.error) throw driversRes.error;
+      if (vehiclesRes.error) throw vehiclesRes.error;
+      if (tripsRes.error) throw tripsRes.error;
+      if (driversRes.error) throw driversRes.error;
 
-        const vehiclesData: Vehicle[] = vehiclesRes.data || [];
-        const tripsData: Trip[] = tripsRes.data || [];
-        const driversData: Driver[] = driversRes.data || [];
+      const vehiclesData: Vehicle[] = vehiclesRes.data || [];
+      const tripsData: Trip[] = tripsRes.data || [];
+      const driversData: Driver[] = driversRes.data || [];
 
-        setVehicles(vehiclesData);
-        setTrips(tripsData);
-        setDrivers(driversData);
+      setVehicles(vehiclesData);
+      setTrips(tripsData);
+      setDrivers(driversData);
 
-        // Extract distinct filter options
-        const uniqueTypes = Array.from(new Set(vehiclesData.map((v) => v.vehicle_type))).filter(Boolean) as string[];
-        const uniqueStatuses = Array.from(new Set(vehiclesData.map((v) => v.status))).filter(Boolean) as string[];
-        const uniqueRegions = Array.from(new Set(vehiclesData.map((v) => v.region))).filter(Boolean) as string[];
+      // Extract distinct filter options
+      const uniqueTypes = Array.from(new Set(vehiclesData.map((v) => v.vehicle_type))).filter(Boolean) as string[];
+      const uniqueStatuses = Array.from(new Set(vehiclesData.map((v) => v.status))).filter(Boolean) as string[];
+      const uniqueRegions = Array.from(new Set(vehiclesData.map((v) => v.region))).filter(Boolean) as string[];
 
-        setVehicleTypes(["All", ...uniqueTypes.sort()]);
-        setStatuses(["All", ...uniqueStatuses.sort()]);
-        setRegions(["All", ...uniqueRegions.sort()]);
-      } catch (err: any) {
-        console.error("Error fetching dashboard data:", err);
-        setError(err.message || "Failed to load dashboard data");
-      } finally {
-        setIsLoading(false);
-      }
+      setVehicleTypes(["All", ...uniqueTypes.sort()]);
+      setStatuses(["All", ...uniqueStatuses.sort()]);
+      setRegions(["All", ...uniqueRegions.sort()]);
+    } catch (err: any) {
+      console.error("Error fetching dashboard data:", err);
+      setError(err.message || "Failed to load dashboard data");
+    } finally {
+      setIsLoading(false);
     }
-
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    // Subscribe to realtime database changes
+    const channel = supabase
+      .channel("dashboard-section-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "vehicles" }, () => {
+        fetchData();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "trips" }, () => {
+        fetchData();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "drivers" }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData]);
 
   // Filter vehicles
   const filteredVehicles = vehicles.filter((v) => {
