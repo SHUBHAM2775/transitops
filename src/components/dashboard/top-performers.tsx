@@ -32,7 +32,7 @@ export function TopPerformers() {
           >
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-sm font-semibold text-accent-foreground">
+                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-sm font-semibold text-black">
                   {driver.name.split(" ").map((n) => n[0]).join("")}
                 </div>
                 {driver.rank <= 3 && (

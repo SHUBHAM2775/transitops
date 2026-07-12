@@ -94,8 +94,8 @@ export function Header({ activeSection }: HeaderProps) {
         {/* User avatar */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-9 h-9 rounded-lg overflow-hidden bg-secondary ring-2 ring-transparent hover:ring-accent/50 transition-all duration-200 outline-none">
-              <div className="w-full h-full bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-xs font-semibold text-accent-foreground">
+            <button className="w-9 h-9 rounded-lg overflow-hidden bg-secondary ring-2 ring-transparent hover:ring-green-600/50 transition-all duration-200 outline-none">
+              <div className="w-full h-full bg-green-600 flex items-center justify-center text-xs font-semibold text-black">
                 {userInitials}
               </div>
             </button>

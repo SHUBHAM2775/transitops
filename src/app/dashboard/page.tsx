@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { DashboardSection } from "@/components/dashboard/sections/dashboard";
-import { PipelineSection } from "@/components/dashboard/sections/pipeline";
+import { FleetSection } from "@/components/dashboard/sections/fleet";
 import { DealsSection } from "@/components/dashboard/sections/deals";
 import { CustomersSection } from "@/components/dashboard/sections/customers";
 import { TeamSection } from "@/components/dashboard/sections/team";
@@ -47,7 +47,7 @@ export default function Dashboard() {
       case "dashboard":
         return <DashboardSection />;
       case "fleet":
-        return <PipelineSection />;
+        return <FleetSection />;
       case "drivers":
         return <DealsSection />;
       case "trips":

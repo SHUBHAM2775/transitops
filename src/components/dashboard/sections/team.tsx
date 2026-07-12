@@ -55,7 +55,7 @@ function TeamMemberCard({ member, index }: { member: TeamMember; index: number }
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-sm font-bold text-accent-foreground">
+            <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-sm font-bold text-black">
               {member.avatar}
             </div>
             {member.rank <= 3 && (
