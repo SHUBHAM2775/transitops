@@ -22,6 +22,8 @@ interface SidebarProps {
   onSectionChange: (section: Section) => void;
   collapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
+  mobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
 }
 
 const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
@@ -40,14 +42,25 @@ export function Sidebar({
   onSectionChange,
   collapsed,
   onCollapsedChange,
+  mobileOpen = false,
+  onMobileOpenChange,
 }: SidebarProps) {
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-out flex flex-col",
-        collapsed ? "w-[72px]" : "w-[260px]"
+    <>
+      {/* Mobile Backdrop */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => onMobileOpenChange?.(false)}
+        />
       )}
-    >
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-out flex flex-col",
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          collapsed ? "w-[260px] md:w-[72px]" : "w-[260px]"
+        )}
+      >
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
@@ -125,5 +138,6 @@ export function Sidebar({
         </button>
       </div>
     </aside>
+    </>
   );
 }

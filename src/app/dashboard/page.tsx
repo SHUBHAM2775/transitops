@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Authentication check
   useEffect(() => {
@@ -73,23 +74,28 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#020204]">
+    <div className="flex min-h-screen bg-[#020204] overflow-hidden">
       <Sidebar
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={(section) => {
+          setActiveSection(section);
+          setMobileMenuOpen(false);
+        }}
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
+        mobileOpen={mobileMenuOpen}
+        onMobileOpenChange={setMobileMenuOpen}
       />
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ease-out ${
-          sidebarCollapsed ? "ml-[72px]" : "ml-[260px]"
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-out ml-0 ${
+          sidebarCollapsed ? "md:ml-[72px]" : "md:ml-[260px]"
         }`}
       >
-        <Header activeSection={activeSection} />
-        <main className="flex-1 p-6 overflow-auto">
+        <Header activeSection={activeSection} onMenuClick={() => setMobileMenuOpen(true)} />
+        <main className="flex-1 p-4 md:p-6 overflow-auto min-w-0 w-full">
           <div
             key={activeSection}
-            className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full"
+            className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full w-full"
           >
             {renderSection()}
           </div>

@@ -127,24 +127,28 @@ export function MaintenanceSection() {
 
         {/* Legend / Rules */}
         <div className="pt-8 space-y-6">
-          <div className="flex items-center gap-4">
-            <span className="text-green-500 font-semibold w-16 text-sm">Available</span>
-            <div className="flex-1 flex items-center justify-center relative h-6">
-              <div className="w-full h-px bg-muted-foreground/40 absolute top-1/2 -translate-y-1/2"></div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-muted-foreground/40 rotate-45"></div>
-              <span className="text-muted-foreground text-[10px] bg-[#020204] px-2 relative z-10">creating active record</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full">
+              <span className="text-green-500 font-semibold w-16 sm:w-16 text-xs sm:text-sm">Available</span>
+              <div className="flex-1 flex items-center justify-center relative h-6 min-w-[60px]">
+                <div className="w-full h-px bg-muted-foreground/40 absolute top-1/2 -translate-y-1/2"></div>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-muted-foreground/40 rotate-45"></div>
+                <span className="text-muted-foreground text-[8px] sm:text-[10px] bg-[#020204] px-1 sm:px-2 relative z-10 text-center whitespace-nowrap">create record</span>
+              </div>
+              <span className="text-[#d97706] font-semibold w-16 sm:w-16 text-xs sm:text-sm text-right">In Shop</span>
             </div>
-            <span className="text-[#d97706] font-semibold w-16 text-sm text-right">In Shop</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-[#d97706] font-semibold w-16 text-sm">In Shop</span>
-            <div className="flex-1 flex items-center justify-center relative h-6">
-              <div className="w-full h-px bg-muted-foreground/40 absolute top-1/2 -translate-y-1/2"></div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-muted-foreground/40 rotate-45"></div>
-              <span className="text-muted-foreground text-[10px] bg-[#020204] px-2 relative z-10">closing record (not active)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full">
+              <span className="text-[#d97706] font-semibold w-16 sm:w-16 text-xs sm:text-sm">In Shop</span>
+              <div className="flex-1 flex items-center justify-center relative h-6 min-w-[60px]">
+                <div className="w-full h-px bg-muted-foreground/40 absolute top-1/2 -translate-y-1/2"></div>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t border-r border-muted-foreground/40 rotate-45"></div>
+                <span className="text-muted-foreground text-[8px] sm:text-[10px] bg-[#020204] px-1 sm:px-2 relative z-10 text-center whitespace-nowrap">close record</span>
+              </div>
+              <span className="text-green-500 font-semibold w-16 sm:w-16 text-xs sm:text-sm text-right">Available</span>
             </div>
-            <span className="text-green-500 font-semibold w-16 text-sm text-right">Available</span>
           </div>
 
           <p className="text-[#d97706] text-sm font-medium">
@@ -165,11 +169,11 @@ export function MaintenanceSection() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Vehicle</th>
-                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Service</th>
-                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Cost</th>
-                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                    <th className="w-12"></th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Vehicle</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Service</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Cost</th>
+                    <th className="text-left py-2 px-6 text-sm font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Status</th>
+                    <th className="w-12 whitespace-nowrap"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -186,10 +190,10 @@ export function MaintenanceSection() {
                         className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors duration-150 cursor-pointer animate-in fade-in slide-in-from-left-2"
                         style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
                       >
-                        <td className="py-2 px-6 font-medium text-sm text-foreground">{record.vehicle}</td>
-                        <td className="py-2 px-6 text-sm text-foreground">{record.service}</td>
-                        <td className="py-2 px-6 font-semibold text-sm text-foreground">{record.cost}</td>
-                        <td className="py-2 px-6">
+                        <td className="py-2 px-6 font-medium text-sm text-foreground whitespace-nowrap">{record.vehicle}</td>
+                        <td className="py-2 px-6 text-sm text-foreground whitespace-nowrap">{record.service}</td>
+                        <td className="py-2 px-6 font-semibold text-sm text-foreground whitespace-nowrap">{record.cost}</td>
+                        <td className="py-2 px-6 whitespace-nowrap">
                           <span className={`inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold rounded-md border ${
                             record.status === 'Completed' 
                               ? 'bg-green-600/20 text-green-500 border-green-600/30' 
@@ -198,7 +202,7 @@ export function MaintenanceSection() {
                             {record.status}
                           </span>
                         </td>
-                        <td className="py-2 px-6 text-right">
+                        <td className="py-2 px-6 text-right whitespace-nowrap">
                           <button 
                             onClick={() => handleDelete(record.id)}
                             className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"

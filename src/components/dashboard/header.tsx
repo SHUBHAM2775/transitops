@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { Section } from "@/app/dashboard/page";
-import { Bell, Search, Calendar, LogOut, User } from "lucide-react";
+import { Bell, Search, Calendar, LogOut, User, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +17,7 @@ import {
 
 interface HeaderProps {
   activeSection: Section;
+  onMenuClick?: () => void;
 }
 
 const sectionTitles: Record<Section, string> = {
@@ -30,7 +31,7 @@ const sectionTitles: Record<Section, string> = {
   settings: "Settings",
 };
 
-export function Header({ activeSection }: HeaderProps) {
+export function Header({ activeSection, onMenuClick }: HeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const router = useRouter();
   
@@ -67,8 +68,14 @@ export function Header({ activeSection }: HeaderProps) {
   const userInitials = userName.substring(0, 2).toUpperCase();
 
   return (
-    <header className="h-16 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between px-6">
-      <div className="flex items-center gap-6">
+    <header className="h-16 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between px-4 md:px-6">
+      <div className="flex items-center gap-3 md:gap-6">
+        <button 
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         <h1 className="text-xl font-semibold text-foreground">
           {sectionTitles[activeSection]}
         </h1>
@@ -82,7 +89,7 @@ export function Header({ activeSection }: HeaderProps) {
         {/* Search */}
         <div
           className={cn(
-            "relative flex items-center transition-all duration-300",
+            "relative hidden sm:flex items-center transition-all duration-300",
             searchFocused ? "w-64" : "w-48"
           )}
         >
@@ -95,6 +102,11 @@ export function Header({ activeSection }: HeaderProps) {
             className="w-full h-9 pl-9 pr-4 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-accent transition-all duration-200"
           />
         </div>
+
+        {/* Mobile Search Icon */}
+        <button className="sm:hidden p-2 text-muted-foreground hover:text-foreground">
+          <Search className="w-5 h-5" />
+        </button>
 
         {/* Notifications */}
         <button className="relative w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200">
